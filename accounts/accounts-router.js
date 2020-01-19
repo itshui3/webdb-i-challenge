@@ -19,11 +19,13 @@ router.get('/', (req, res) => {
     })
 })
 //get account by id
-router.get('/:id', (req, res) => {
-  // requires validation of id
+router.get('/:id', validation.validateAccountId, (req, res) => {
+  // 4:50pm 1.18.20 - requires validation of id
+  // 5:10pm 1.18.20 - validation middleware built
   const id = req.params.id;
   accountsDb.getById(id)
     .then( resou => {
+      console.log(resou);
       res.status(200).json({ message: `status 200: successfully retrieved account record`, resource: resou })
     })
     .catch( err => {
@@ -31,8 +33,8 @@ router.get('/:id', (req, res) => {
     })
 })
 //post account
-router.post('/', (req, res) => {
-  // requires validation of req.body required props
+router.post('/', validation.validateNewAccount, (req, res) => {
+  // 4:50pm 1.18.20 - requires validation of req.body required props
   accountsDb.insert(req.body)
     .then( resou => {
       res.status(200).json({ message: `status 200: successfully added account`, resource: resou })
@@ -43,7 +45,8 @@ router.post('/', (req, res) => {
     })
 })
 //update account
-router.put('/:id', (req, res) => {
+const accounts__put__mw = [validation.validateAccountId, validation.validateNewAccount];
+router.put('/:id', ...accounts__put__mw, (req, res) => {
   const id = req.params.id;
   const newAccount = req.body;
   accountsDb.update(id, newAccount)
@@ -56,7 +59,7 @@ router.put('/:id', (req, res) => {
     })
 })
 //remove account
-router.delete('/:id', (req, res) => {
+router.delete('/:id', validation.validateAccountId, (req, res) => {
   const id = req.params.id;
   accountsDb.remove(id)
     .then( resou => {
